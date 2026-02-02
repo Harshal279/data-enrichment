@@ -1,4 +1,3 @@
-# packages.txt
 libnss3
 libatk1.0-0
 libatk-bridge2.0-0
@@ -26,3 +25,4 @@ libpangocairo-1.0-0
 libcairo2
 libcairo-gobject2
 libgdk-pixbuf-2.0-0
+
