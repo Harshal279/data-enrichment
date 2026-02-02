@@ -15,12 +15,27 @@ import sys
 import os
 
 # Very simple cloud detection (works most of the time)
-if "STREAMLIT" in os.environ or "HOSTNAME" in os.environ:
+import os
+import sys
+import subprocess
+
+# Windows fix (keep if needed)
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
+# ─── Install Playwright browsers on Streamlit Cloud ───
+if "STREAMLIT" in os.environ or os.getenv("IS_STREAMLIT_CLOUD"):
     try:
-        os.system("playwright install --with-deps chromium")
-        # or more minimal: os.system("playwright install chromium")
+        # First try with deps (sometimes more reliable)
+        subprocess.run(["playwright", "install-deps"], check=True, capture_output=True)
+        subprocess.run(["playwright", "install", "chromium"], check=True, capture_output=True)
+        print("Playwright chromium installed successfully (cloud).")
+    except subprocess.CalledProcessError as e:
+        print(f"Playwright install failed: {e.stderr.decode()}")
+        # Fallback – minimal install
+        os.system("playwright install chromium --with-deps")
     except Exception as e:
-        st.warning(f"Playwright install failed: {e}\nApp might not crawl JS sites.")
+        print(f"Playwright setup error: {e}")
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -316,4 +331,5 @@ Website content:
 elif not hf_token.strip() and uploaded_file is not None:
     st.warning("Please enter your Hugging Face token to start processing.")
 else:
+
     st.info("Upload your file containing websites to begin.")
