@@ -8,34 +8,26 @@ import io
 import time
 from urllib.parse import urlparse
 import traceback
-
-# Windows asyncio fix
-import sys
-# ─── Install Playwright browsers if running in cloud ───
-import os
-
-# Very simple cloud detection (works most of the time)
 import os
 import sys
 import subprocess
+import asyncio
 
-# Windows fix (keep if needed)
+# Windows fix (only matters locally)
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-# ─── Install Playwright browsers on Streamlit Cloud ───
-if "STREAMLIT" in os.environ or os.getenv("IS_STREAMLIT_CLOUD"):
+# Force Playwright browser install on Render startup
+if "RENDER" in os.environ or "PORT" in os.environ:
+    print("Render detected → installing Playwright Chromium...")
     try:
-        # First try with deps (sometimes more reliable)
+        # Install system deps (if not covered by packages.txt)
         subprocess.run(["playwright", "install-deps"], check=True, capture_output=True)
+        # Install chromium browser
         subprocess.run(["playwright", "install", "chromium"], check=True, capture_output=True)
-        print("Playwright chromium installed successfully (cloud).")
-    except subprocess.CalledProcessError as e:
-        print(f"Playwright install failed: {e.stderr.decode()}")
-        # Fallback – minimal install
-        os.system("playwright install chromium --with-deps")
-    except Exception as e:
-        print(f"Playwright setup error: {e}")
+        print("Playwright Chromium installed successfully on Render.")
+    except Exception as install_error:
+        print(f"Playwright install failed on Render: {install_error}")
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -333,3 +325,4 @@ elif not hf_token.strip() and uploaded_file is not None:
 else:
 
     st.info("Upload your file containing websites to begin.")
+
