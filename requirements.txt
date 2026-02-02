@@ -5,4 +5,5 @@ crawl4ai>=0.4          # adjust version if you want to pin
 huggingface_hub>=0.25
 playwright>=1.45       # usually needed explicitly
 python-dotenv>=1.0     # optional — if you later want to use .env for token
+xlsxwriter
 
